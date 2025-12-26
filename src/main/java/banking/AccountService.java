@@ -15,7 +15,16 @@ public class AccountService {
     }
 
     public void processTransfer(TransferRequest tr, boolean approve) {
-        if (approve) tr.getFrom().withdraw(tr.getAmount());
-        tr.setStatus(approve ? TransferStatus.APPROVED : TransferStatus.DECLINED);
+        if (approve && tr.getStatus() == TransferStatus.PENDING) {
+            if (tr.getFrom().getBalance() >= tr.getAmount()) {
+                tr.getFrom().forceDebit(tr.getAmount());
+                tr.getTo().forceCredit(tr.getAmount());
+                tr.setStatus(TransferStatus.APPROVED);
+            } else {
+                tr.setStatus(TransferStatus.DECLINED);
+            }
+        } else {
+            tr.setStatus(TransferStatus.DECLINED);
+        }
     }
 }

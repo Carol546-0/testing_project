@@ -7,7 +7,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class LoginUI {
-
     private AccountService service = new AccountService();
 
     public void show(Stage stage) {
@@ -16,7 +15,6 @@ public class LoginUI {
 
         TextField usernameField = new TextField();
         usernameField.setPromptText("Username");
-
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Password");
 
@@ -24,32 +22,25 @@ public class LoginUI {
         Label msg = new Label();
 
         loginBtn.setOnAction(e -> {
-            String username = usernameField.getText();
-            String password = passwordField.getText();
-            User loggedIn = null;
+            String user = usernameField.getText();
+            String pass = passwordField.getText();
+            User loggedIn = FakeDatabase.users.stream()
+                .filter(u -> u.getUsername().equals(user) && u.getPassword().equals(pass))
+                .findFirst().orElse(null);
 
-            for (User u : FakeDatabase.users) {
-                if (u.getUsername().equals(username) && u.getPassword().equals(password)) {
-                    loggedIn = u;
-                    break;
-                }
-            }
-
-            if (loggedIn == null) {
-                msg.setText("Invalid credentials");
-            } else if (loggedIn instanceof Admin admin) {
-                AdminControllerGUI adminGUI = new AdminControllerGUI(service, stage);
-                adminGUI.show();
+            if (loggedIn instanceof Admin) {
+                new AdminControllerGUI(service, stage).show();
             } else if (loggedIn instanceof Client client) {
-                ClientController clientGUI = new ClientController(service, client.getAccount(), stage);
-                clientGUI.show();
+                // FIXED: Passing client instead of client.getAccount()
+                new ClientController(service, client, stage).show();
+            } else {
+                msg.setText("Invalid Login");
             }
         });
 
-        root.getChildren().addAll(new Label("Login"), usernameField, passwordField, loginBtn, msg);
-
-        stage.setScene(new Scene(root, 300, 200));
-        stage.setTitle("Banking App Login");
+        root.getChildren().addAll(new Label("Banking Login"), usernameField, passwordField, loginBtn, msg);
+        stage.setScene(new Scene(root, 300, 250));
+        stage.setTitle("Login");
         stage.show();
     }
 }
