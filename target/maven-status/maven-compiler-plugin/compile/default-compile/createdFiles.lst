@@ -1,4 +1,13 @@
 banking\AccountService.class
+banking\TransferStatus.class
+banking\Admin.class
+banking\User.class
 banking\Account.class
 banking\BankingApp.class
 banking\ClientController.class
+banking\AdminControllerGUI.class
+banking\FakeDatabase.class
+banking\AccountStatus.class
+banking\Client.class
+banking\LoginUI.class
+banking\TransferRequest.class

@@ -1,34 +1,23 @@
 package banking;
 
 public class Account {
+    private int balance;
 
-    private String clientName;
-    private double balance;
-    private String status; // Verified, Suspended, Closed
-
-    public Account(String clientName, double balance) {
-        this.clientName = clientName;
+    public Account(int balance) {
         this.balance = balance;
-        this.status = "Verified";
     }
 
-    public String getClientName() {
-        return clientName;
-    }
-
-    public double getBalance() {
+    public int getBalance() {
         return balance;
     }
 
-    public void setBalance(double balance) {
-        this.balance = balance;
+    public void deposit(int amount) {
+        balance += amount;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
+    public boolean withdraw(int amount) {
+        if (amount > balance) return false;
+        balance -= amount;
+        return true;
     }
 }

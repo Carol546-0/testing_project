@@ -1,38 +1,21 @@
 package banking;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class AccountService {
+    private List<TransferRequest> transfers = new ArrayList<>();
 
-    public boolean processDeposit(Account account, double amount) {
-        if (account.getStatus().equals("Closed") || account.getStatus().equals("Suspended"))
-            return false;
-
-        if (amount <= 0) return false;
-
-        account.setBalance(account.getBalance() + amount);
-        return true;
+    public void addTransfer(TransferRequest tr) {
+        transfers.add(tr);
     }
 
-    public boolean processWithdraw(Account account, double amount) {
-        if (account.getStatus().equals("Closed") || account.getStatus().equals("Suspended"))
-            return false;
-
-        if (amount <= 0 || amount > account.getBalance())
-            return false;
-
-        account.setBalance(account.getBalance() - amount);
-        return true;
+    public List<TransferRequest> getAllTransfers() {
+        return transfers;
     }
 
-    // Admin actions
-    public void suspend(Account account) {
-        account.setStatus("Suspended");
-    }
-
-    public void verify(Account account) {
-        account.setStatus("Verified");
-    }
-
-    public void close(Account account) {
-        account.setStatus("Closed");
+    public void processTransfer(TransferRequest tr, boolean approve) {
+        if (approve) tr.getFrom().withdraw(tr.getAmount());
+        tr.setStatus(approve ? TransferStatus.APPROVED : TransferStatus.DECLINED);
     }
 }
