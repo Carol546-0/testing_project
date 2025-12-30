@@ -17,8 +17,10 @@ public class AccountService {
     public void processTransfer(TransferRequest tr, boolean approve) {
         if (approve && tr.getStatus() == TransferStatus.PENDING) {
             if (tr.getFrom().getBalance() >= tr.getAmount()) {
+                // Record transfer details in history
                 tr.getFrom().forceDebit(tr.getAmount());
                 tr.getTo().forceCredit(tr.getAmount());
+                
                 tr.setStatus(TransferStatus.APPROVED);
             } else {
                 tr.setStatus(TransferStatus.DECLINED);
