@@ -7,7 +7,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class LoginUI {
-    private AccountService service = new AccountService();
+    // FIXED: Make this static so it persists after logout/login
+    private static AccountService service = new AccountService();
 
     public void show(Stage stage) {
         VBox root = new VBox(10);
@@ -31,7 +32,6 @@ public class LoginUI {
             if (loggedIn instanceof Admin) {
                 new AdminControllerGUI(service, stage).show();
             } else if (loggedIn instanceof Client client) {
-                // FIXED: Passing client instead of client.getAccount()
                 new ClientController(service, client, stage).show();
             } else {
                 msg.setText("Invalid Login");

@@ -32,14 +32,20 @@ public class ClientController {
 
         Button depBtn = new Button("Deposit");
         depBtn.setOnAction(e -> {
-            client.getAccount().deposit(Double.parseDouble(amountInput.getText()));
-            show(); // Refresh
+            if (client.getAccount().deposit(Double.parseDouble(amountInput.getText()))) {
+                show(); 
+            } else {
+                new Alert(Alert.AlertType.ERROR, "Deposit failed (Check status/amount)").showAndWait();
+            }
         });
 
         Button withBtn = new Button("Withdraw");
         withBtn.setOnAction(e -> {
-            client.getAccount().withdraw(Double.parseDouble(amountInput.getText()));
-            show(); // Refresh
+            if (client.getAccount().withdraw(Double.parseDouble(amountInput.getText()))) {
+                show(); 
+            } else {
+                new Alert(Alert.AlertType.ERROR, "Withdraw failed (Insufficient funds/status)").showAndWait();
+            }
         });
 
         Button transBtn = new Button("Request Transfer");
@@ -51,6 +57,7 @@ public class ClientController {
         root.getChildren().addAll(infoLabel, statusLabel, balanceLabel, amountInput, depBtn, withBtn, transBtn, logoutBtn);
         stage.setScene(new Scene(root, 400, 400));
         stage.setTitle("Client Dashboard");
+        stage.show();
     }
 
     private void openTransferDialog() {
@@ -77,17 +84,31 @@ public class ClientController {
 
         dialog.setResultConverter(btn -> {
             if (btn == sendBtn) {
-                User recipient = FakeDatabase.findUser(toUser.getText(), toAcc.getText());
-                if (recipient != null && recipient.getAccount().getStatus().equals("Verified")) {
-                    return new TransferRequest(client.getAccount(), recipient.getAccount(), Integer.parseInt(amount.getText()));
-                } else {
-                    new Alert(Alert.AlertType.ERROR, "Recipient not found or not Verified!").showAndWait();
+                try {
+                    int amt = Integer.parseInt(amount.getText());
+                    // Check balance before allowing the request
+                    if (client.getAccount().getBalance() < amt) {
+                        new Alert(Alert.AlertType.ERROR, "Insufficient balance to request this transfer!").showAndWait();
+                        return null;
+                    }
+
+                    User recipient = FakeDatabase.findUser(toUser.getText(), toAcc.getText());
+                    if (recipient != null && recipient.getAccount().getStatus().equals("Verified")) {
+                        return new TransferRequest(client.getAccount(), recipient.getAccount(), amt);
+                    } else {
+                        new Alert(Alert.AlertType.ERROR, "Recipient not found or not Verified!").showAndWait();
+                    }
+                } catch (NumberFormatException ex) {
+                    new Alert(Alert.AlertType.ERROR, "Please enter a valid amount.").showAndWait();
                 }
             }
             return null;
         });
 
         Optional<TransferRequest> result = dialog.showAndWait();
-        result.ifPresent(req -> service.addTransfer(req));
+        result.ifPresent(req -> {
+            service.addTransfer(req);
+            show(); // Refresh to show feedback if needed
+        });
     }
 }
