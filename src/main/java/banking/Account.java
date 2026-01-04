@@ -7,7 +7,7 @@ import java.util.Random;
 public class Account {
     private String accountNumber;
     private double balance;
-    private String status; 
+    private String status;
     private List<String> transactionHistory; // NEW: Store history
 
     public Account(double initialBalance) {
@@ -17,6 +17,15 @@ public class Account {
         this.transactionHistory = new ArrayList<>();
         addTransaction("Account opened with balance: $" + initialBalance);
     }
+
+    public Account(double initialBalance, String status) {
+        this.balance = initialBalance;
+        this.status = status;
+        this.accountNumber = String.format("%06d", new Random().nextInt(999999));
+        this.transactionHistory = new ArrayList<>();
+        addTransaction("Account opened with balance: $" + initialBalance);
+    }
+
 
     public void addTransaction(String message) {
         transactionHistory.add(message);
@@ -40,13 +49,13 @@ public class Account {
         return true;
     }
 
-    public void forceDebit(double amount) { 
-        this.balance -= amount; 
+    public void forceDebit(double amount) {
+        this.balance -= amount;
         addTransaction("Transfer Sent: -$" + amount + " | Balance: $" + balance);
     }
-    
-    public void forceCredit(double amount) { 
-        this.balance += amount; 
+
+    public void forceCredit(double amount) {
+        this.balance += amount;
         addTransaction("Transfer Received: +$" + amount + " | Balance: $" + balance);
     }
 
@@ -54,4 +63,13 @@ public class Account {
     public double getBalance() { return balance; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+    public List<String> getSecureTransactionHistory() {
+        if (status.equals("Closed")) {
+            throw new IllegalStateException(
+                    "Closed accounts cannot access transaction history"
+            );
+        }
+        return transactionHistory;
+    }
+
 }
